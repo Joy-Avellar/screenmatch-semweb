@@ -1,18 +1,12 @@
 package br.com.alura.ScreenMatch.Principal;
 
-import br.com.alura.ScreenMatch.Model.DadosEpsodios;
-import br.com.alura.ScreenMatch.Model.DadosSerie;
-import br.com.alura.ScreenMatch.Model.DadosTemporada;
-import br.com.alura.ScreenMatch.Model.Episodio;
+import br.com.alura.ScreenMatch.Model.*;
 import br.com.alura.ScreenMatch.service.ConsumoApi;
 import br.com.alura.ScreenMatch.service.ConverteDados;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Principal {
@@ -31,41 +25,42 @@ public class Principal {
         var opcao = -1;
 
         while (opcao != 0) {
-            var menu = """
-                    O que você deseja fazer?
-                    1- Buscar Serie
-                    2- Buscar Informações detalhadas
-                    3 - LIstar Séries BUscadas
-                    0- Sair
-                    """;
-            System.out.println(menu);
-            System.out.println("Digite uma opção: ");
-            opcao = leitura.nextInt();
+            try {
+                var menu = """
+                        O que você deseja fazer?
+                        1- Buscar Serie
+                        2- Buscar Informações detalhadas
+                        3 - LIstar Séries BUscadas
+                        0- Sair
+                        """;
+                System.out.println(menu);
+                System.out.println("Digite uma opção: ");
+                opcao = leitura.nextInt();
+                leitura.nextLine();
+
+                switch (opcao) {
+
+                    case 1:
+                        buscarSerieWeb();
+                        break;
+                    case 2:
+                        buscarEpisodioPorSerie();
+                        break;
+                    case 3:
+                        listarSeriesBUscadas();
+                        break;
+                    case 0:
+                        System.out.println("Saindo...");
+                        break;
+                    default:
+                        System.out.println("Opção inválida");
+                } } catch(InputMismatchException ex){
+            System.out.println("Opção invalida, tente novamente");
             leitura.nextLine();
-
-            switch (opcao) {
-
-                case 1:
-                    buscarSerieWeb();
-                    break;
-                case 2:
-                    buscarEpisodioPorSerie();
-                    break;
-                case 3:
-                    listarSeriesBUscadas();
-                    break;
-                case 0:
-                    System.out.println("Saindo...");
-                    break;
-                default:
-                    System.out.println("Opção inválida");
             }
         }
+    }
 
-    }
-    private void listarSeriesBUscadas() {
-        dadosSeries.forEach(System.out::println);
-    }
 
     private void buscarSerieWeb () {
                 DadosSerie dados = getDadosSerie();
@@ -90,8 +85,19 @@ public class Principal {
                 }
                 temporadas.forEach(System.out::println);
             }
-
+    private void listarSeriesBUscadas() {
+        List<Serie> series = new ArrayList<>();
+        series = dadosSeries.stream()
+                        .map(d -> new Serie(d))
+                                .collect(Collectors.toList());
+        series.stream()
+                .sorted(Comparator.comparing(Serie::getGenero))
+                .forEach(System.out::println);
     }
+
+
+
+}
 
 //    private DadosEpsodios getDadosEpisodios() {
 //        System.out.println("Digite o nome da Série");
@@ -126,4 +132,4 @@ public class Principal {
 //                .sorted(Comparator.comparing(DadosEpsodios:: avaliacao).reversed())
 //                .limit(10)
 //                .map(e-> e.titulo().toUpperCase())
-//                .forEach(System.out::println);
+//                .forEach(System.out::println)
