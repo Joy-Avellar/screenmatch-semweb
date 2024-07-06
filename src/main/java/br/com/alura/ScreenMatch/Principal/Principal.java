@@ -45,6 +45,9 @@ public class Principal {
                         3 - LIstar Séries Buscadas
                         4 - Buscar uma série no Banco de Dados
                         5 - BUscar Série por Ator
+                        6 - BUscar Séries POr Gênero
+                        7 - Byscar Séries por NUmero de Temporadas
+                        8 - BUscar Séries POr Avaliação
                         0 - Sair
                         """;
                 System.out.println(menu);
@@ -69,6 +72,15 @@ public class Principal {
                     case 5:
                         buscarSeriePorAtor();
                         break;
+                    case 6:
+                        buscarSeriePorGenero();
+                        break;
+                    case 7:
+                        buscarSeriePorNUmeroTemporada();
+                        break;
+                    case 8:
+                        buscarSeriesPorAvaliacao();
+                        break;
                     case 0:
                         System.out.println("Saindo...");
                         break;
@@ -84,6 +96,13 @@ public class Principal {
 
 
 
+    private DadosSerie getDadosSerie() {
+        System.out.println("Digite o nome da série para busca");
+        var nomeSerie = leitura.nextLine();
+        var json = consumo.obterDados(ENDERECO + nomeSerie.replace(" ", "+") + API_KEY);
+        DadosSerie dados = conversor.obterDados(json, DadosSerie.class);
+        return dados;
+    }
     private void buscarSerieWeb() {
         DadosSerie dados = getDadosSerie();
         List<Serie> existingSerie = repositorio.findByTitulo(dados.getTitulo());
@@ -95,13 +114,6 @@ public class Principal {
             System.out.println("Série salva: " + dados);
         }
 
-    }
-    private DadosSerie getDadosSerie() {
-        System.out.println("Digite o nome da série para busca");
-        var nomeSerie = leitura.nextLine();
-        var json = consumo.obterDados(ENDERECO + nomeSerie.replace(" ", "+") + API_KEY);
-        DadosSerie dados = conversor.obterDados(json, DadosSerie.class);
-        return dados;
     }
     private void buscarEpisodioPorSerie() {
         listarSeriesBUscadas();
@@ -164,7 +176,6 @@ public class Principal {
             buscarSeriePorTitulo();
         }
     }
-
     private void buscarSeriePorAtor() {
 
         System.out.println("DIgite o nome do Ator");
@@ -180,10 +191,58 @@ public class Principal {
                     + s.getAtores()
                     + "\n"
                     +  s.getGenero()));
-            exibeMenu();
         } else {
             System.out.println("Nenhuma Série Encontrada");
         }
     }
- }
+    private void buscarSeriePorGenero() {
+
+        System.out.println("DIgite um Gênero");
+        String tipoGenero = leitura.nextLine();
+
+        Categoria categoria = Categoria.fromPortugues(tipoGenero);
+        List<Serie> seriesGenero = repositorio.findByGenero(categoria);
+        System.out.println("As séries da categoria " + tipoGenero + " são");
+
+        seriesGenero.forEach(System.out::println);
+
+    }
+    private void buscarSeriePorNUmeroTemporada() {
+        System.out.println("Até quantas Temporadas deseja buscar? ");
+        var numeroTemporadas = leitura.nextInt();
+        leitura.nextLine();
+        List <Serie> serieTemporadas = repositorio.findByTotalTemporadasLessThanEqual(numeroTemporadas);
+
+
+        if (!serieTemporadas.isEmpty()) {
+            System.out.println("As séries  com menos de " + numeroTemporadas + " são");
+
+            serieTemporadas.forEach(System.out::println);
+
+        } else {
+            System.out.println("Nenhuma Série Encontrada");
+        }
+
+    }
+    private void buscarSeriesPorAvaliacao() {
+
+        System.out.println("Qual avaliação mínima deseja buscar? ");
+        var avaliacaoMinima = leitura.nextInt();
+        leitura.nextLine();
+        List <Serie> serieTemporadas = repositorio.findByAvaliacaoGreaterThanEqual(avaliacaoMinima);
+
+
+        if (!serieTemporadas.isEmpty()) {
+            System.out.println("As séries  com mais de " + avaliacaoMinima + " são");
+
+            serieTemporadas.forEach(System.out::println);
+
+        } else {
+            System.out.println("Nenhuma Série Encontrada");
+        }
+
+
+    }
+
+}
 
