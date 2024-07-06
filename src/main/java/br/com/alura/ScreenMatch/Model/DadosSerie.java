@@ -26,4 +26,8 @@ public record DadosSerie(@JsonAlias("Title") String titulo,
                 "\n atores: " + atores +
                 "\n Sinopse: " + sinopse;
 }
+
+
+    public String getTitulo() {
+    return titulo;}
 }

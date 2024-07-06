@@ -3,22 +3,30 @@ package br.com.alura.ScreenMatch.Principal;
 import br.com.alura.ScreenMatch.Model.*;
 import br.com.alura.ScreenMatch.service.ConsumoApi;
 import br.com.alura.ScreenMatch.service.ConverteDados;
-
+import br.com.alura.ScreenMatch.Repository.SerieRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 public class Principal {
+
 
     private Scanner leitura = new Scanner(System.in);
     private ConsumoApi consumo = new ConsumoApi();
     private ConverteDados conversor = new ConverteDados();
 
     private final String ENDERECO = "http://www.omdbapi.com/?t=";
-    private final String API_KEY = "&apikey=7d277e04";
+    private final String API_KEY = "&apikey=" + System.getenv("OMDB_KEY");
     private final String SEASON = "&season=";
     private List<DadosSerie> dadosSeries = new ArrayList<>();
+
+    private SerieRepository repositorio;
+
+    public Principal(SerieRepository repositorio) {
+        this.repositorio = repositorio;
+    }
 
     public void exibeMenu() {
 
@@ -63,9 +71,22 @@ public class Principal {
 
 
     private void buscarSerieWeb () {
-                DadosSerie dados = getDadosSerie();
-                System.out.println(dados);
-                dadosSeries.add(dados);
+//        DadosSerie dados = getDadosSerie();
+//        Serie serie = new Serie(dados);
+//        //dadosSeries.add(dados);
+//        repositorio.save(serie);
+//        System.out.println(dados);
+
+        DadosSerie dados = getDadosSerie();
+        List<Serie> existingSerie = repositorio.findByTitulo(dados.getTitulo());
+        if (!existingSerie.isEmpty()) {
+            System.out.println("A série já existe no banco de dados: " + existingSerie.get(0));
+        } else {
+            Serie serie = new Serie(dados);
+            repositorio.save(serie);
+            System.out.println("Série salva: " + dados);
+        }
+
             }
     private DadosSerie getDadosSerie () {
                 System.out.println("Digite o nome da série para busca");
@@ -86,10 +107,8 @@ public class Principal {
                 temporadas.forEach(System.out::println);
             }
     private void listarSeriesBUscadas() {
-        List<Serie> series = new ArrayList<>();
-        series = dadosSeries.stream()
-                        .map(d -> new Serie(d))
-                                .collect(Collectors.toList());
+
+        List<Serie> series = repositorio.findAll();
         series.stream()
                 .sorted(Comparator.comparing(Serie::getGenero))
                 .forEach(System.out::println);

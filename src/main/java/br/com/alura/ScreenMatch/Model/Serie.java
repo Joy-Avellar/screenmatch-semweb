@@ -2,19 +2,36 @@ package br.com.alura.ScreenMatch.Model;
 
 import br.com.alura.ScreenMatch.service.traducao.ConsultaMyMemory;
 import com.fasterxml.jackson.annotation.JsonAlias;
+import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.OptionalDouble;
 
+@Entity
+@Table(name="series")
 public class Serie  {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Column(unique = true)
+    private String titulo;
+    private Integer totalTemporadas;
+    private Double avaliacao;
 
-    @JsonAlias("Title") String titulo;
-    @JsonAlias("totalSeasons") Integer totalTemporadas;
-    @JsonAlias("imdbRating") Double avaliacao;
-    @JsonAlias("Genre") Categoria genero;
-    @JsonAlias("Writer") String escritor;
-    @JsonAlias("Actors") String atores;
-    @JsonAlias("Plot") String sinopse;
-    @JsonAlias("poster") String poster;
+    @Enumerated(EnumType.STRING)
+    private Categoria genero;
+    private String escritor;
+    private String atores;
+    private String sinopse;
+    private String poster;
+
+    @Transient
+    private List<Episodio> episodios = new ArrayList<>();
+
+    public Serie(){
+
+    }
 
     public Serie(DadosSerie dadosSerie) {
         this.titulo = dadosSerie.titulo();
@@ -26,6 +43,22 @@ public class Serie  {
         this.sinopse = ConsultaMyMemory.obterTraducao(dadosSerie.sinopse()).trim();
         this.poster = dadosSerie.poster();
 
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public List<Episodio> getEpisodios() {
+        return episodios;
+    }
+
+    public void setEpisodios(List<Episodio> episodios) {
+        this.episodios = episodios;
     }
 
     public String getTitulo() {
