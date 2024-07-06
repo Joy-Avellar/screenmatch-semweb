@@ -18,20 +18,20 @@ public class Principal {
     private Scanner leitura = new Scanner(System.in);
     private ConsumoApi consumo = new ConsumoApi();
     private ConverteDados conversor = new ConverteDados();
+    private List<DadosSerie> dadosSeries = new ArrayList<>();
+    private List<Serie> series = new ArrayList<>();
 
     private final String ENDERECO = "http://www.omdbapi.com/?t=";
     private final String API_KEY = "&apikey=" + System.getenv("OMDB_KEY");
     private final String SEASON = "&season=";
-    private List<DadosSerie> dadosSeries = new ArrayList<>();
 
     private SerieRepository repositorio;
 
-    private List<Serie> series = new ArrayList<>();
+    Optional<Serie> serieBuscada;
 
     public Principal(SerieRepository repositorio) {
         this.repositorio = repositorio;
     }
-
     public void exibeMenu() {
 
         var opcao = -1;
@@ -40,14 +40,15 @@ public class Principal {
             try {
                 var menu = """
                         O que você deseja fazer?
-                        1 - Buscar Serie
-                        2 - Buscar Episodios de Uma Série
-                        3 - LIstar Séries Buscadas
-                        4 - Buscar uma série no Banco de Dados
-                        5 - BUscar Série por Ator
-                        6 - BUscar Séries POr Gênero
-                        7 - Byscar Séries por NUmero de Temporadas
-                        8 - BUscar Séries POr Avaliação
+                        1 - Buscar e Adicionar uma Série no Banco de Dados;
+                        2 - Listar Séries Buscadas;
+                        3 - Buscar Episodios de uma Série;
+                        4 - Buscar uma série no Banco de Dados;
+                        5 - BUscar Série por Ator;
+                        6 - BUscar Séries POr Gênero;
+                        7 - Byscar Séries por NUmero de Temporadas;
+                        8 - BUscar Séries POr Avaliação;
+                        9 - Buscar Episódios POr temporada;
                         0 - Sair
                         """;
                 System.out.println(menu);
@@ -60,10 +61,10 @@ public class Principal {
                     case 1:
                         buscarSerieWeb();
                         break;
-                    case 2:
+                    case 3:
                         buscarEpisodioPorSerie();
                         break;
-                    case 3:
+                    case 2:
                         listarSeriesBUscadas();
                         break;
                     case 4:
@@ -81,6 +82,9 @@ public class Principal {
                     case 8:
                         buscarSeriesPorAvaliacao();
                         break;
+                    case 9:
+                        buscarEpisodiosPorTemporada();
+                        break;
                     case 0:
                         System.out.println("Saindo...");
                         break;
@@ -94,8 +98,27 @@ public class Principal {
         }
     }
 
+    private void buscarEpisodiosPorTemporada() {
+        buscarSeriePorTitulo();
+
+        if(serieBuscada.isPresent()) {
+            System.out.println("QUal temporada deseja buscar? ");
+            var numeroDaTemporada = leitura.nextInt();
+            leitura.nextLine();
+            List <Episodio> episodiosTemporada = repositorio.findByTemporada(numeroDaTemporada);
 
 
+            if (!episodiosTemporada.isEmpty()) {
+                System.out.println("Os episódios dessa temporada são: ");
+
+                episodiosTemporada.forEach(System.out::println);
+
+            } else {
+                System.out.println("Temporada não encontrada");
+            } }
+
+
+    }
     private DadosSerie getDadosSerie() {
         System.out.println("Digite o nome da série para busca");
         var nomeSerie = leitura.nextLine();
@@ -153,28 +176,27 @@ public class Principal {
     private void buscarSeriePorTitulo() {
         System.out.println("DIgite o nome da serie");
         var nomeSerie = leitura.nextLine();
-        Optional<Serie> serieBuscada = repositorio.findByTituloContainingIgnoreCase(nomeSerie);
+        serieBuscada = repositorio.findByTituloContainingIgnoreCase(nomeSerie);
 
         if (serieBuscada.isPresent()) {
             System.out.println("Os dados da série buscada são: " + serieBuscada.get());
-            exibeMenu();
         } else {
             System.out.println("Série Não encontrada. Deseja adicionar? \n " +
                     "DIgite 1 para Sim ou 2 para encerrar.");
-        }
+            var respostaUsuario = leitura.nextInt();
+            leitura.nextLine();
 
-        var respostaUsuario = leitura.nextInt();
-        leitura.nextLine();
-
-        if (respostaUsuario == 1) {
+            if (respostaUsuario == 1) {
                 buscarSerieWeb();
             } else if (respostaUsuario == 2) {
                 System.out.println("Encerrando programa");
                 System.exit(0);
             } else {
-            System.out.println("Opção invalida, tente novamente");
-            buscarSeriePorTitulo();
+                System.out.println("Opção invalida, tente novamente");
+            }
         }
+
+
     }
     private void buscarSeriePorAtor() {
 
