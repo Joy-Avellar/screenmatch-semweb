@@ -169,10 +169,17 @@ public class Principal {
 
         System.out.println("DIgite o nome do Ator");
         var nomeAtor = leitura.nextLine();
-        Optional <Serie> seriesAtor = repositorio.findByAtoresContainingIgnoreCase(nomeAtor);
+        List <Serie> seriesAtor = repositorio.findByAtoresContainingIgnoreCase(nomeAtor);
 
-        if (seriesAtor.isPresent()) {
-            System.out.println("As séries desse ator são: " + seriesAtor.get());
+        if (!seriesAtor.isEmpty()) {
+            System.out.println("As séries encontradas foram: ");
+            seriesAtor.forEach(s -> System.out.println(s.getTitulo()
+                    + "\nAvaliação: "
+                    + s.getAvaliacao()
+                    + "\nAtores: "
+                    + s.getAtores()
+                    + "\n"
+                    +  s.getGenero()));
             exibeMenu();
         } else {
             System.out.println("Nenhuma Série Encontrada");
